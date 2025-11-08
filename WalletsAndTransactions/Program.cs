@@ -1,70 +1,73 @@
 ﻿using WalletsAndTransactions;
+using WalletsAndTransactions.IO;
 
+var app = new WalletsAndTransactionsApp();
 var exit = false;
 
 var commands = new (string Name, Action Invoke)[]
 {
     ("Внести данные", () => {}),
-    ("Вывести данные", () => {}),
+    ("Добавить кошелёк", app.AskToAddWallet),
+    ("Добавить транзакцию", app.AskToAddTransaction),
     ("Отформатировать данные для заданного месяца", () => {}),
     ("Вывести 3 самых больших траты для каждого кошелька для указанного месяца", () => {}),
     ("Выйти", () => exit = true)
 };
 
-var commandsPrinter = new TablePrinter
-(
+var commandsPrinter = new TablePrinter(
     commands
         .Select((command, i) => new[] { i.ToString(), command.Name })
         .Prepend(["ID", "Действие"])
-        .ToArray()
-);
+        .ToArray());
 
-do
+AskTheme();
+Console.WriteLine("Вы можете вводить CTRL+C для выхода из операций и для отмены подтверждений");
+while (!exit)
 {
-    Console.ForegroundColor = ConsoleColor.White;
+    Loop();
+}
+
+Console.WriteLine("\nПрощайте");
+return 0;
+
+void AskTheme()
+{
+    Console.WriteLine("Если тема вашей консоли белая, введите что-либо и нажмите <Enter>,\n" +
+                      "иначе нажмите <Enter> без ввода");
+
+    var line = Console.ReadLine();
+    if (line == null)
+    {
+        exit = true;
+    }
+    else
+    {
+        ConsoleExt.Init(line == ""
+            ? new ConsoleExt.ColorsTheme(ConsoleColor.White, ConsoleColor.Yellow)
+            : new ConsoleExt.ColorsTheme(ConsoleColor.Black, ConsoleColor.DarkYellow));
+    }
+}
+
+void Loop()
+{
+    Console.WriteLine();
     commandsPrinter.Print();
     Console.WriteLine();
 
     try
     {
-        commands[ReadInt()].Invoke();
+        commands[ConsoleExt.ReadIntOrThrow()].Invoke();
     }
-    catch (CancelException)
+    catch (CancellationException)
     {
-        break;
+        exit = true;
     }
     catch (FormatException)
     {
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("! Вы ошиблись при вводе ID команды");
+        ConsoleExt.WriteWarningLine("Вы ошиблись при вводе ID команды");
     }
     catch (IndexOutOfRangeException)
     {
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        Console.WriteLine("! Команды под таким ID не существует, перепрочтите список");
-    }
-} while (!exit);
-
-Console.WriteLine("Прощайте");
-return;
-
-int ReadInt()
-{
-    Console.Write("> ");
-    var line = Console.ReadLine();
-    if (line == null)
-    {
-        throw new CancelException();
-    }
-
-    try
-    {
-        return Convert.ToInt32(line);
-    }
-    catch (FormatException)
-    {
-        throw new FormatException();
+        ConsoleExt.WriteWarningLine("Команды под таким ID не существует, перепрочтите список");
     }
 }
-
-internal class CancelException : Exception;
