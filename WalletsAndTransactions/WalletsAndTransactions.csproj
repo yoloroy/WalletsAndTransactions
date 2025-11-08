@@ -8,4 +8,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="NativeFileDialogCore" Version="1.0.3" />
+      <PackageReference Include="System.Text.Json" Version="9.0.10" />
+    </ItemGroup>
+
 </Project>

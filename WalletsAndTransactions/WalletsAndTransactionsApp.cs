@@ -1,6 +1,10 @@
 using System.Globalization;
+using System.Text.Json;
 using WalletsAndTransactions.Entities;
 using WalletsAndTransactions.IO;
+using WalletsAndTransactions.POCOs;
+using WalletsAndTransactions.Util;
+using FileDialog = NativeFileDialogCore.Dialog;
 
 namespace WalletsAndTransactions;
 
@@ -11,6 +15,64 @@ public class WalletsAndTransactionsApp
 
     private readonly List<Wallet> _wallets = [];
     private readonly List<Transaction> _transactions = [];
+
+    public void AskToImportData()
+    {
+        try
+        {
+            Console.WriteLine("Вам будет открыто окно для выбора файла");
+            var result = FileDialog.FileOpen("json");
+
+            if (result.IsCancelled)
+            {
+                throw new CancellationException();
+            }
+            if (result.IsError)
+            {
+                ConsoleExt.WriteWarningLine($"Что-то пошло не так: {result.ErrorMessage!}");
+            }
+
+            var path = result.Path ?? AskFilePath();
+
+            ConsoleExt.WriteWarningLine($"TODO: OPEN {path}");
+
+            try
+            {
+                var imported = JsonSerializerExt.DeserializeBy(File.ReadAllText(path), new
+                {
+                    Wallets = Array.Empty<WalletPOCO>(),
+                    Transactions = Array.Empty<TransactionPOCO>()
+                })!;
+
+                _wallets.Clear();
+                _wallets.AddRange(imported.Wallets.Select(poco => poco.ToEntity(_transactions)).ToList());
+                _transactions.Clear();
+                _transactions.AddRange(imported.Transactions.Select(poco => poco.ToEntity()).ToList());
+            }
+            catch (JsonException)
+            {
+                ConsoleExt.WriteWarningLine("Ошибка в формате файла");
+            }
+        }
+        catch (CancellationException)
+        {
+            ConsoleExt.WriteWarningLine("Вы вышли из операции импорта из файла");
+        }
+        return;
+
+        string AskFilePath()
+        {
+            Console.WriteLine("Введите путь к файлу JSON для загрузки данных:");
+            return ConsoleExt.Retrying(
+                ConsoleExt.ReadLineOrThrow, (
+                    failMessage: "Путь к файлу не может быть пустым",
+                    check: line => line.Length > 0
+                ), (
+                    failMessage: "Такого файла не существует",
+                    check: Path.Exists
+                ));
+        }
+    }
 
     public void AskToAddWallet()
     {
@@ -120,7 +182,7 @@ public class WalletsAndTransactionsApp
         }
         catch (CancellationException)
         {
-            ConsoleExt.WriteWarningLine("Вы вышли из операции добавления кошелька");
+            ConsoleExt.WriteWarningLine("Вы вышли из операции добавления транзакции");
         }
 
         return;

@@ -6,7 +6,7 @@ var exit = false;
 
 var commands = new (string Name, Action Invoke)[]
 {
-    ("Внести данные", () => {}),
+    ("Импортировать данные из файла", app.AskToImportData),
     ("Добавить кошелёк", app.AskToAddWallet),
     ("Добавить транзакцию", app.AskToAddTransaction),
     ("Отформатировать данные для заданного месяца", () => {}),
