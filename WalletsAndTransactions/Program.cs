@@ -24,7 +24,8 @@ var commandsPrinter = new TablePrinter(
 
 AskTheme();
 ConsoleExt.WriteWarningLine("Использовать консоль в ide (как минимум, Rider) не рекомендуется");
-Console.WriteLine("Вы можете вводить CTRL+C для выхода из операций и для отмены подтверждений");
+Console.WriteLine("Вы можете вводить CTRL+C или CTRL+D (в зависимости от платформы)");
+Console.WriteLine("для выхода из операций и для отмены подтверждений");
 while (!exit)
 {
     Loop();
