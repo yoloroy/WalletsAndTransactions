@@ -190,7 +190,7 @@ public class ConsoleApp(Repository repository)
         }
     }
 
-    public void OnPrintDataForMonth()
+    public void OnPrintMonthlyTransactionsReport()
     {
         if (_repository.IsEmpty)
         {
