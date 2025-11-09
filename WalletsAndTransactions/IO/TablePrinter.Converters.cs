@@ -29,11 +29,10 @@ public partial class TablePrinter
             return
             [
                 transaction.Id.ToString(),
-                transaction.WalletId.ToString(),
-                transaction.Description ?? "/Пусто/", // TODO locale formatting
                 transaction.Date.ToString(CultureInfo.CurrentCulture),
                 transaction.AbsoluteAmount.ToString(CultureInfo.CurrentCulture),
-                transaction.Type == TransactionType.Income ? "Зачисление" : "Списание" // TODO locale formatting
+                transaction.Type == TransactionType.Income ? "Зачисление" : "Списание", // TODO locale formatting
+                transaction.Description ?? "/Пусто/" // TODO locale formatting
             ];
         }
     };
