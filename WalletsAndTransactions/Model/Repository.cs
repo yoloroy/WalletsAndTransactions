@@ -20,22 +20,42 @@ public class Repository
     /// </summary>
     /// <param name="wallets">Кошельки</param>
     /// <param name="transactions">Транзакции</param>
-    public void Load(IEnumerable<WalletPOCO> wallets, IEnumerable<TransactionPOCO> transactions)
+    /// <returns>Были ли загружены данные</returns>
+    public bool TryLoad(IEnumerable<WalletPOCO> wallets, IEnumerable<TransactionPOCO> transactions)
     {
-        var transactionsList = transactions.ToList();
+        var transactionsList = transactions.ToLookup(keySelector: poco => poco.WalletId);
 
         foreach (var wallet in wallets)
         {
+            if (wallet.StartingBalance < 0)
+            {
+                return false;
+            }
+
             var id = _nextWalletId++;
             var loadingId = wallet.Id;
 
-            var walletTransactions = transactionsList
-                .Where(poco => poco.WalletId == loadingId)
-                .Select(poco => new Transaction(_nextTransactionId++, poco.Date, poco.SumUpdate, poco.Description))
-                .ToList();
+            var pocoTransactions = transactionsList[loadingId].OrderBy(poco => poco.Date).ToList();
 
-            _wallets[id] = new Wallet(id, wallet.Name, wallet.CurrencyId, wallet.StartingBalance, walletTransactions);
+            var balance = wallet.StartingBalance;
+            foreach (var poco in pocoTransactions)
+            {
+                if (poco.SumUpdate == 0 ||
+                    balance + poco.SumUpdate < 0)
+                {
+                    return false;
+                }
+
+                balance += poco.SumUpdate;
+            }
+
+            var walletTransactions = pocoTransactions
+                .Select(poco => new Transaction(_nextTransactionId++, poco.Date, poco.SumUpdate, poco.Description));
+
+            _wallets[id] = new Wallet(id, wallet.Name, wallet.CurrencyId, wallet.StartingBalance, walletTransactions.ToList());
         }
+
+        return true;
     }
 
     public Wallet AddWallet(string name, string currencyId, decimal startingBalance)
@@ -46,10 +66,19 @@ public class Repository
         return wallet;
     }
 
+    /// <summary>
+    /// Проверяет, могла ли транзакция быть осуществлена и возвращает сформированную транзакцию
+    /// </summary>
+    /// <param name="walletId">ID кошелька</param>
+    /// <param name="date">Дата проведения транзакции</param>
+    /// <param name="sumUpdate">Дельта суммы на счету</param>
+    /// <param name="description">Описание</param>
+    /// <param name="transaction">Сформированный объект транзакции</param>
+    /// <returns><c>true</c>, если транзакция могла быть осущствлена, <c>false</c>, если нет</returns>
     public bool TryAddTransaction(int walletId, DateOnly date, decimal sumUpdate, string? description, out Transaction transaction)
     {
-        transaction = new Transaction(_nextTransactionId, date, sumUpdate, description);
-        return _wallets[walletId].TryAddTransaction(transaction);
+        transaction = new Transaction(_nextTransactionId++, date, sumUpdate, description);
+        return Transaction.AmountIsNonZero(sumUpdate) && _wallets[walletId].TryAddTransaction(transaction);
     }
 
     public bool TryGetWalletById(int id, out Wallet? wallet) => _wallets.TryGetValue(id, out wallet);

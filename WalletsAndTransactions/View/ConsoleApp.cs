@@ -36,10 +36,16 @@ public class ConsoleApp(Repository repository)
                     Transactions = Array.Empty<TransactionPOCO>()
                 })!;
 
-                _repository.Load(imported.Wallets, imported.Transactions);
-                Console.WriteLine($"Файл {path} был загружен");
-                Console.WriteLine($"Всего кошельков {_repository.Wallets.Count()}");
-                Console.WriteLine($"Всего транзакций {_repository.Transactions.Count()}");
+                if (_repository.TryLoad(imported.Wallets, imported.Transactions))
+                {
+                    Console.WriteLine($"Файл {path} был загружен");
+                    Console.WriteLine($"Всего кошельков {_repository.Wallets.Count()}");
+                    Console.WriteLine($"Всего транзакций {_repository.Transactions.Count()}");
+                }
+                else
+                {
+                    ConsoleExt.WriteWarningLine("Ошибка в загружаемых данных");
+                }
             }
             catch (JsonException)
             {
@@ -159,6 +165,9 @@ public class ConsoleApp(Repository repository)
                 ), (
                     failMessage: "Вы не можете снять больше, чем есть на кошельке в данный момент",
                     check: wallet.SupportsTransactionUpdate
+                ), (
+                    failMessage: "Это операция не могла быть осуществлена, ведь тогда бы баланс ушёл в минус в тот день",
+                    check: update => wallet.TransactionStoryWillFitWith(date, update)
                 ));
 
             Console.WriteLine("Вы ввели:");
