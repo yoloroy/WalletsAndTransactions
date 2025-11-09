@@ -15,6 +15,11 @@ public class Repository
 
     public IEnumerable<Transaction> Transactions => Wallets.SelectMany(wallet => wallet.Transactions);
 
+    /// <summary>
+    /// Добавляет кошельки и транзакции к уже существующим в репозитории, оригинальные идентификаторы при этои теряются.
+    /// </summary>
+    /// <param name="wallets">Кошельки</param>
+    /// <param name="transactions">Транзакции</param>
     public void Load(IEnumerable<WalletPOCO> wallets, IEnumerable<TransactionPOCO> transactions)
     {
         var transactionsList = transactions.ToList();
@@ -49,6 +54,9 @@ public class Repository
 
     public bool TryGetWalletById(int id, out Wallet? wallet) => _wallets.TryGetValue(id, out wallet);
 
+    /// <param name="year">Год</param>
+    /// <param name="month">Месяц</param>
+    /// <returns><c>MonthlyTransactionsReport</c></returns>
     public MonthlyTransactionsReport GetMonthlyTransactionsReport(int year, int month)
     {
         var thatMonth = Transactions
@@ -68,6 +76,9 @@ public class Repository
         return new (incomes, expenses, incomes.Sum(t => t.AbsoluteAmount), expenses.Sum(t => t.AbsoluteAmount));
     }
 
+    /// <param name="year">Год</param>
+    /// <param name="month">Месяц</param>
+    /// <returns>3 самые большие траты за указанный месяц для каждого кошелька, отсортированные по убыванию суммы</returns>
     public IEnumerable<(Wallet Wallet, IEnumerable<Transaction> Top3)> GetTop3TransactionsByMonth(int year, int month)
     {
         return Wallets
@@ -81,6 +92,15 @@ public class Repository
             .Where(group => group.Item2.Any());
     }
 
+    /// <summary>
+    /// Сгруппированные транзакции по типам (Income/Expense),
+    /// группы отсортированные по общей сумме (по убыванию),
+    /// в каждой группе транзакции отсортированны по дате (от самых старых к самым новым).
+    /// </summary>
+    /// <param name="Incomes">Зачисления</param>
+    /// <param name="Expenses">Списания</param>
+    /// <param name="IncomesSum">Абсолютная сумма зачислений</param>
+    /// <param name="ExpensesSum">Абсолютная сумма списания</param>
     public record struct MonthlyTransactionsReport(
         IReadOnlyList<Transaction> Incomes,
         IReadOnlyList<Transaction> Expenses,

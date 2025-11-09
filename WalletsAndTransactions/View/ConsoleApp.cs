@@ -29,6 +29,7 @@ public class ConsoleApp(Repository repository)
 
             try
             {
+                // Если логика усложнится, то следует вынести в отдельный класс
                 var imported = JsonSerializerExt.DeserializeBy(File.ReadAllText(path), new
                 {
                     Wallets = Array.Empty<WalletPOCO>(),
