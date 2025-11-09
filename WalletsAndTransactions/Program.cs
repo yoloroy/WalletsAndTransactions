@@ -1,4 +1,5 @@
-﻿using WalletsAndTransactions.IO;
+﻿using System.Globalization;
+using WalletsAndTransactions.IO;
 using WalletsAndTransactions.Model;
 using WalletsAndTransactions.View;
 
@@ -16,19 +17,41 @@ var commands = new (string Name, Action Invoke)[]
     ("Выйти", () => exit = true)
 };
 
-var commandsPrinter = new TablePrinter(
+var commandsPrinter = TablePrinter.OfStringCells(
     commands
         .Select((command, i) => new[] { i.ToString(), command.Name })
         .Prepend(["ID", "Действие"])
         .ToArray());
 
+InitStatic();
 AskTheme();
+
 ConsoleExt.WriteWarningLine("Использовать консоль в ide (как минимум, Rider) не рекомендуется");
 Console.WriteLine("Вы можете вводить CTRL+C или CTRL+D (в зависимости от платформы)");
 Console.WriteLine("для выхода из операций и для отмены подтверждений");
+
 while (!exit)
 {
-    Loop();
+    Console.WriteLine();
+    commandsPrinter.Print();
+    Console.WriteLine();
+
+    try
+    {
+        commands[ConsoleExt.ReadIntOrThrow()].Invoke();
+    }
+    catch (CancellationException)
+    {
+        exit = true;
+    }
+    catch (FormatException)
+    {
+        ConsoleExt.WriteWarningLine("Вы ошиблись при вводе ID команды");
+    }
+    catch (IndexOutOfRangeException)
+    {
+        ConsoleExt.WriteWarningLine("Команды под таким ID не существует, перепрочтите список");
+    }
 }
 
 Console.WriteLine("\nПрощайте");
@@ -52,26 +75,23 @@ void AskTheme()
     }
 }
 
-void Loop()
+void InitStatic()
 {
-    Console.WriteLine();
-    commandsPrinter.Print();
-    Console.WriteLine();
+    TablePrinter.AddConverter<Wallet>(wallet =>
+    [
+        wallet.Id.ToString(),
+        wallet.Name,
+        wallet.CurrencyId,
+        wallet.StartingBalance.ToString(CultureInfo.CurrentCulture),
+        wallet.Balance.ToString(CultureInfo.CurrentCulture)
+    ]);
 
-    try
-    {
-        commands[ConsoleExt.ReadIntOrThrow()].Invoke();
-    }
-    catch (CancellationException)
-    {
-        exit = true;
-    }
-    catch (FormatException)
-    {
-        ConsoleExt.WriteWarningLine("Вы ошиблись при вводе ID команды");
-    }
-    catch (IndexOutOfRangeException)
-    {
-        ConsoleExt.WriteWarningLine("Команды под таким ID не существует, перепрочтите список");
-    }
+    TablePrinter.AddConverter<Transaction>(transaction =>
+    [
+        transaction.Id.ToString(),
+        transaction.Date.ToString(CultureInfo.CurrentCulture),
+        transaction.AbsoluteAmount.ToString(CultureInfo.CurrentCulture),
+        transaction.Type == TransactionType.Income ? "Зачисление" : "Списание", // TODO locale formatting
+        transaction.Description ?? "/Пусто/" // TODO locale formatting
+    ]);
 }

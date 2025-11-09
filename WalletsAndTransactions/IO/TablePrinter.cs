@@ -1,10 +1,31 @@
 namespace WalletsAndTransactions.IO;
 
-public partial class TablePrinter(string[][] rows) // TODO Row as class with Divider as special case for handling headers and other stuff
+public partial class TablePrinter
 {
-    private readonly int[] _lengths = CalculateLengths(rows);
+    private readonly int[] _lengths;
+    private readonly string[][] _rows;
 
-    // TODO guard checks for rows and move it to factory method
+    private TablePrinter(string[][] rows)
+    {
+        _rows = rows;
+        _lengths = CalculateLengths(rows);
+    }
+
+    public static TablePrinter OfStringCells(string[][] rows)
+    {
+        if (rows.Length == 0)
+        {
+            return new TablePrinter([]);
+        }
+
+        var cellsCount = rows[0].Length;
+        if (rows.Any(row => row.Length != cellsCount))
+        {
+            throw new ArgumentException("Количество ячеек в ряду должно быть одинаковым для всех рядов", nameof(rows));
+        }
+
+        return new TablePrinter(rows);
+    }
 
     public static TablePrinter OfAny(object[] rows) =>
         new ((from row in rows select Converters[row.GetType()](row)).ToArray());
@@ -13,13 +34,9 @@ public partial class TablePrinter(string[][] rows) // TODO Row as class with Div
 
     public static void Print(object[] rows) => OfAny(rows).Print();
 
-    public IEnumerable<string> GetLines()
-    {
-        foreach (var row in rows)
-        {
-            yield return string.Join(" | ", row.Select((cell, i) => cell.PadRight(_lengths[i], ' ')));
-        }
-    }
+    public IEnumerable<string> GetLines() => _rows.Select(row => row
+        .Select((cell, i) => cell.PadRight(_lengths[i], ' ')))
+        .Select(spacedCells => string.Join(" | ", spacedCells));
 
     public void Print()
     {
