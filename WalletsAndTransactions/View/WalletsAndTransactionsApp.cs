@@ -82,14 +82,14 @@ public class WalletsAndTransactionsApp
             var name = ConsoleExt.Retrying(
                 ConsoleExt.ReadLineOrThrow, (
                     failMessage: "Название кошелька не должно быть пустым",
-                    check: line => line.Length > 0
+                    check: Wallet.NameIsNotEmpty
                 ));
 
             Console.WriteLine("Введите идентификатор валюты кошелька:");
             var currency = ConsoleExt.Retrying(
                 ConsoleExt.ReadLineOrThrow, (
                     failMessage: "Идентификатор валюты не может быть пустым",
-                    check: line => line.Length > 0
+                    check: Wallet.CurrencyIdIsNotEmpty
                 ));
 
             Console.WriteLine("Введите начальный баланс кошелька:");
@@ -97,7 +97,7 @@ public class WalletsAndTransactionsApp
                 ConsoleExt.ReadDecimalOrThrow,
                 formatFailMessage: "Введённое значение не соответствует формату десятичного числа", (
                     failMessage: "Баланс на кошельке не может быть ниже нуля",
-                    check: value => value >= 0
+                    check: Wallet.StartingBalanceIsNotNegative
                 ));
 
             Console.WriteLine("Вы ввели:");
@@ -124,16 +124,17 @@ public class WalletsAndTransactionsApp
         try
         {
             Console.WriteLine("Введите Id кошелька:");
+            Wallet? outWallet = null;
             var walletId = ConsoleExt.Retrying(
                 ConsoleExt.ReadIntOrThrow,
                 formatFailMessage: "Вы ввели не целое число", (
                     failMessage: "Кошелька под таким Id не существует",
-                    check: id => _wallets.Any(wallet => wallet.Id == id)
+                    check: id => (outWallet = _wallets.FirstOrDefault(w => w.Id == id)) != null
                 ), (
                     failMessage: "Вы отменили выбор кошелька, повторите вновь",
-                    check: IsConfirmingWalletChoice
+                    check: _ => IsConfirmingWalletChoice(outWallet!)
                 ));
-            var wallet = _wallets.First(wallet => wallet.Id == walletId);
+            var wallet = outWallet!;
 
             Console.WriteLine("Введите описание транзакции или пустую строку:");
             string? description = ConsoleExt.ReadLineOrThrow();
@@ -150,10 +151,10 @@ public class WalletsAndTransactionsApp
                 ConsoleExt.ReadDecimalOrThrow,
                 formatFailMessage: "Введённое значение не соответствует формату десятичного числа", (
                     failMessage: "Операция без суммы не несёт смысла",
-                    check: value => value != 0
+                    check: Transaction.AmountIsNonZero
                 ), (
                     failMessage: "Вы не можете снять больше, чем есть на кошельке в данный момент",
-                    check: update => wallet.Balance + update >= 0
+                    check: wallet.SupportsTransactionUpdate
                 ));
 
             Console.WriteLine("Вы ввели:");
@@ -187,12 +188,11 @@ public class WalletsAndTransactionsApp
 
         return;
 
-        bool IsConfirmingWalletChoice(int id)
+        bool IsConfirmingWalletChoice(Wallet wallet)
         {
             try
             {
-                var walletName = _wallets.First(wallet => wallet.Id == id).Name;
-                Console.WriteLine($"Вы выбрали кошелёк под названием \"{walletName}\".");
+                Console.WriteLine($"Вы выбрали кошелёк под названием \"{wallet.Name}\".");
                 Console.WriteLine("Подтвердите выбор, нажатием <Enter>");
                 ConsoleExt.ReadLineOrThrow();
                 return true;
