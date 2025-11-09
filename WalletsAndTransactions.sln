@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletsAndTransactions", "WalletsAndTransactions\WalletsAndTransactions.csproj", "{EE384B44-01F1-463D-8CFF-30C5D561857D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WalletsAndTransactions.Tests", "WalletsAndTransactions.Tests\WalletsAndTransactions.Tests.csproj", "{C829EC90-953B-4AFC-8047-7E2EC1637994}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{EE384B44-01F1-463D-8CFF-30C5D561857D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE384B44-01F1-463D-8CFF-30C5D561857D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE384B44-01F1-463D-8CFF-30C5D561857D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C829EC90-953B-4AFC-8047-7E2EC1637994}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C829EC90-953B-4AFC-8047-7E2EC1637994}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C829EC90-953B-4AFC-8047-7E2EC1637994}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C829EC90-953B-4AFC-8047-7E2EC1637994}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

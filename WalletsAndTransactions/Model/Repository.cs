@@ -88,6 +88,7 @@ public class Repository
                     transaction.Date.Month == month &&
                     transaction.Type == TransactionType.Expense)
                 .OrderByDescending(transaction => transaction.AbsoluteAmount)
+                .Take(3)
                 .AsEnumerable()))
             .Where(group => group.Item2.Any());
     }

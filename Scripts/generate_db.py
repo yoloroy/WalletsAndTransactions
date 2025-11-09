@@ -5,7 +5,7 @@ from tkinter import filedialog
 
 
 WALLETS_N = 20
-TRANSACTIONS_N = 50
+TRANSACTIONS_N = 200
 ACTOR_NAMES = list({chr(i) for i in range(ord('А'), ord('Я'))} - {'Ь', 'Ъ'})
 CURRENCIES = ['RUB', 'USD', 'EUR', 'GBP', 'BYN', 'KZT', 'DEN', 'INR', 'AWG', 'KPW']
 STARTING_BALANCE_RANGE = 0, 100_000
