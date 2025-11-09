@@ -13,7 +13,7 @@ public class ConsoleApp(Repository repository)
     private static readonly string[] WalletFields = ["Id", "Название", "Валюта", "Начальный баланс", "Текущий Баланс"];
     private static readonly string[] TransactionFields = ["Id", "Id кошелька", "Описание", "Дата", "Сумма", "Тип"];
 
-    public void AskToImportData()
+    public void OnImportData()
     {
         try
         {
@@ -66,7 +66,7 @@ public class ConsoleApp(Repository repository)
         }
     }
 
-    public void AskToAddWallet()
+    public void OnAddWallet()
     {
         try
         {
@@ -110,7 +110,7 @@ public class ConsoleApp(Repository repository)
         }
     }
 
-    public void AskToAddTransaction()
+    public void OnAddTransaction()
     {
         try
         {

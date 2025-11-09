@@ -8,9 +8,9 @@ var exit = false;
 
 var commands = new (string Name, Action Invoke)[]
 {
-    ("Импортировать данные из файла", app.AskToImportData),
-    ("Добавить кошелёк", app.AskToAddWallet),
-    ("Добавить транзакцию", app.AskToAddTransaction),
+    ("Импортировать данные из файла", app.OnImportData),
+    ("Добавить кошелёк", app.OnAddWallet),
+    ("Добавить транзакцию", app.OnAddTransaction),
     ("Вывести отформатированные данные для заданного месяца", () => {}),
     ("Вывести 3 самых больших траты для каждого кошелька для указанного месяца", () => {}),
     ("Выйти", () => exit = true)
