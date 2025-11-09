@@ -68,6 +68,19 @@ public class Repository
         return new (incomes, expenses, incomes.Sum(t => t.AbsoluteAmount), expenses.Sum(t => t.AbsoluteAmount));
     }
 
+    public IEnumerable<(Wallet Wallet, IEnumerable<Transaction> Top3)> GetTop3TransactionsByMonth(int year, int month)
+    {
+        return Wallets
+            .Select(wallet => (wallet, wallet.Transactions
+                .Where(transaction =>
+                    transaction.Date.Year == year &&
+                    transaction.Date.Month == month &&
+                    transaction.Type == TransactionType.Expense)
+                .OrderByDescending(transaction => transaction.AbsoluteAmount)
+                .AsEnumerable()))
+            .Where(group => group.Item2.Any());
+    }
+
     public record struct MonthlyTransactionsReport(
         IReadOnlyList<Transaction> Incomes,
         IReadOnlyList<Transaction> Expenses,

@@ -203,21 +203,8 @@ public class ConsoleApp(Repository repository)
             return;
         }
 
-        Console.WriteLine("Введите год для фильтрации:");
-        var year = ConsoleExt.Retrying(
-            ConsoleExt.ReadIntOrThrow,
-            formatFailMessage: "Вы ввели не целое число", (
-                failMessage: "Год не может быть отрицательным",
-                check: year => year > 0
-            ));
-
-        Console.WriteLine("Введите месяц (1-12) для фильтрации:");
-        var month = ConsoleExt.Retrying(
-            ConsoleExt.ReadIntOrThrow,
-            formatFailMessage: "Вы ввели не целое число", (
-                failMessage: "Месяц должен быть от 1 до 12",
-                check: month => month is >= 1 and <= 12
-            ));
+        var year = ReadYear();
+        var month = ReadMonth();
 
         var (incomes, expenses, incomesSum, expensesSum) = _repository.GetMonthlyTransactionsReport(year, month);
 
@@ -249,5 +236,69 @@ public class ConsoleApp(Repository repository)
             Console.WriteLine($"Сумма зачислений: {incomesSum}");
             TablePrinter.Print(incomes.Prepend<object>(TransactionFields).ToArray());
         }
+    }
+
+    public void OnPrintTop3Expenses()
+    {
+        if (_repository.IsEmpty)
+        {
+            Console.WriteLine("Кошельков нет");
+            return;
+        }
+        if (!_repository.Transactions.Any())
+        {
+            Console.WriteLine("Транзакций нет");
+            return;
+        }
+
+        var year = ReadYear();
+        var month = ReadMonth();
+
+        var tops = _repository.GetTop3TransactionsByMonth(year, month).ToList();
+
+        var walletsRows = TablePrinter
+            .OfAny(tops.Select(t => t.Wallet).Prepend<object>(WalletFields).ToArray())
+            .GetLines();
+
+        // Пропустим заголовок
+        Console.WriteLine(walletsRows.First());
+        var blocks = walletsRows.Skip(1).Zip(tops.Select(top => top.Top3));
+
+        foreach (var (walletLine, transactions) in blocks)
+        {
+            var transactionLines = TablePrinter
+                .OfAny(transactions.Prepend<object>(TransactionFields).ToArray())
+                .GetLines();
+
+            Console.WriteLine(walletLine);
+            foreach (var transactionLine in transactionLines)
+            {
+                Console.WriteLine($"  + {transactionLine}");
+            }
+
+            Console.WriteLine();
+        }
+    }
+
+    private static int ReadMonth()
+    {
+        Console.WriteLine("Введите месяц (1-12):");
+        return ConsoleExt.Retrying(
+            ConsoleExt.ReadIntOrThrow,
+            formatFailMessage: "Вы ввели не целое число", (
+                failMessage: "Месяц должен быть от 1 до 12",
+                check: month => month is >= 1 and <= 12
+            ));
+    }
+
+    private static int ReadYear()
+    {
+        Console.WriteLine("Введите год:");
+        return ConsoleExt.Retrying(
+            ConsoleExt.ReadIntOrThrow,
+            formatFailMessage: "Вы ввели не целое число", (
+                failMessage: "Год не может быть отрицательным",
+                check: year => year > 0
+            ));
     }
 }

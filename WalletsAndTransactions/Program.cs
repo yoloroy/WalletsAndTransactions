@@ -12,7 +12,7 @@ var commands = new (string Name, Action Invoke)[]
     ("Добавить кошелёк", app.OnAddWallet),
     ("Добавить транзакцию", app.OnAddTransaction),
     ("Вывести отформатированные данные для заданного месяца", app.OnPrintMonthlyTransactionsReport),
-    ("Вывести 3 самых больших траты для каждого кошелька для указанного месяца", () => {}),
+    ("Вывести 3 самых больших траты для каждого кошелька для указанного месяца", app.OnPrintTop3Expenses),
     ("Выйти", () => exit = true)
 };
 
@@ -23,6 +23,7 @@ var commandsPrinter = new TablePrinter(
         .ToArray());
 
 AskTheme();
+ConsoleExt.WriteWarningLine("Использовать консоль в ide (как минимум, Rider) не рекомендуется");
 Console.WriteLine("Вы можете вводить CTRL+C для выхода из операций и для отмены подтверждений");
 while (!exit)
 {
