@@ -9,6 +9,4 @@ public class TransactionPOCO
     public DateOnly Date { get; set; }
     public decimal SumUpdate { get; set; }
     public string? Description { get; set; } = null;
-
-    public Transaction ToEntity() => new(Id, WalletId, Date, SumUpdate, Description);
 }

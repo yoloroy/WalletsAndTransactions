@@ -5,24 +5,26 @@ public class Wallet(
     string name,
     string currencyId,
     decimal startingBalance,
-    List<Transaction> transactionsTable)
+    List<Transaction> transactions)
 {
+    private List<Transaction> _transactions = transactions;
+
     public readonly int Id = id;
     public readonly string Name = name;
     public readonly string CurrencyId = currencyId;
     public readonly decimal StartingBalance = startingBalance;
 
-    public IEnumerable<Transaction> Transactions => transactionsTable.Where(transaction => transaction.WalletId == Id);
-    public decimal Balance => StartingBalance + Transactions.Sum(transaction => transaction.SumUpdate);
+    public IEnumerable<Transaction> Transactions => _transactions;
+
+    public decimal Balance => StartingBalance + _transactions.Sum(transaction => transaction.SumUpdate);
 
     public bool TryAddTransaction(Transaction transaction)
     {
-        if (SupportsTransactionUpdate(transaction.SumUpdate))
+        if (!SupportsTransactionUpdate(transaction.SumUpdate))
         {
             return false;
         }
-
-        transactionsTable.Add(transaction);
+        _transactions.Add(transaction);
         return true;
     }
 

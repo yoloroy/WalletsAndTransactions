@@ -4,7 +4,6 @@ namespace WalletsAndTransactions.Model;
 
 public record Transaction(
     int Id,
-    int WalletId,
     DateOnly Date,
     decimal SumUpdate,
     string? Description = null)

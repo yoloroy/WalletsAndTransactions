@@ -8,13 +8,10 @@ using FileDialog = NativeFileDialogCore.Dialog;
 
 namespace WalletsAndTransactions.View;
 
-public class WalletsAndTransactionsApp
+public class ConsoleApp(Repository repository)
 {
     private static readonly string[] WalletFields = ["Id", "Название", "Валюта", "Начальный баланс", "Текущий Баланс"];
     private static readonly string[] TransactionFields = ["Id", "Id кошелька", "Описание", "Дата", "Сумма", "Тип"];
-
-    private readonly List<Wallet> _wallets = [];
-    private readonly List<Transaction> _transactions = [];
 
     public void AskToImportData()
     {
@@ -34,8 +31,6 @@ public class WalletsAndTransactionsApp
 
             var path = result.Path ?? AskFilePath();
 
-            ConsoleExt.WriteWarningLine($"TODO: OPEN {path}");
-
             try
             {
                 var imported = JsonSerializerExt.DeserializeBy(File.ReadAllText(path), new
@@ -44,10 +39,7 @@ public class WalletsAndTransactionsApp
                     Transactions = Array.Empty<TransactionPOCO>()
                 })!;
 
-                _wallets.Clear();
-                _wallets.AddRange(imported.Wallets.Select(poco => poco.ToEntity(_transactions)).ToList());
-                _transactions.Clear();
-                _transactions.AddRange(imported.Transactions.Select(poco => poco.ToEntity()).ToList());
+                repository.Load(imported.Wallets, imported.Transactions);
             }
             catch (JsonException)
             {
@@ -108,8 +100,7 @@ public class WalletsAndTransactionsApp
             Console.WriteLine("Подтвердите ввод, нажатием <Enter>");
             ConsoleExt.ReadLineOrThrow();
 
-            var wallet = new Wallet(_wallets.Count, name, currency, balance, _transactions);
-            _wallets.Add(wallet);
+            var wallet = repository.AddWallet(name, currency, balance);
             Console.WriteLine("Добавлен новый кошелёк:");
             TablePrinter.Print([WalletFields, wallet]);
         }
@@ -129,7 +120,7 @@ public class WalletsAndTransactionsApp
                 ConsoleExt.ReadIntOrThrow,
                 formatFailMessage: "Вы ввели не целое число", (
                     failMessage: "Кошелька под таким Id не существует",
-                    check: id => (outWallet = _wallets.FirstOrDefault(w => w.Id == id)) != null
+                    check: id => repository.TryGetWalletById(id, out outWallet)
                 ), (
                     failMessage: "Вы отменили выбор кошелька, повторите вновь",
                     check: _ => IsConfirmingWalletChoice(outWallet!)
@@ -166,16 +157,12 @@ public class WalletsAndTransactionsApp
             Console.WriteLine("Подтвердите ввод, нажатием <Enter>");
             ConsoleExt.ReadLineOrThrow();
 
-            var transaction = new Transaction(
-                _transactions.Count,
-                walletId,
-                DateOnly.FromDateTime(DateTime.Now),
-                update,
-                description);
-
-            if (!wallet.TryAddTransaction(transaction))
+            if (!repository.TryAddTransaction(
+                    walletId, DateOnly.FromDateTime(DateTime.Now), update, description,
+                    out var transaction))
             {
-                ConsoleExt.WriteWarningLine("Ошибка при добавлении транзакции");
+                Console.WriteLine("Неизвестная ошибка при добавлении транзакции");
+                return;
             }
 
             Console.WriteLine("Добавлена новая транзакция:");
