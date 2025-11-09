@@ -5,15 +5,15 @@ using WalletsAndTransactions.IO;
 using WalletsAndTransactions.Model;
 using WalletsAndTransactions.POCOs;
 using WalletsAndTransactions.Util;
-using FileDialog = NativeFileDialogCore.Dialog;
 
 namespace WalletsAndTransactions.View;
 
 public class ConsoleApp(Repository repository)
 {
     private static readonly string[] WalletFields = ["Id", "Название", "Валюта", "Начальный баланс", "Текущий Баланс"];
-    private static readonly string[] TransactionFields = ["Id", "Id кошелька", "Описание", "Дата", "Сумма", "Тип"];
     private static readonly string[] TransactionFields = ["Id", "Дата", "Сумма", "Тип", "Описание"];
+
+    private readonly Repository _repository = repository;
 
     public void OnImportData()
     {
@@ -35,7 +35,10 @@ public class ConsoleApp(Repository repository)
                     Transactions = Array.Empty<TransactionPOCO>()
                 })!;
 
-                repository.Load(imported.Wallets, imported.Transactions);
+                _repository.Load(imported.Wallets, imported.Transactions);
+                Console.WriteLine($"Файл {path} был загружен");
+                Console.WriteLine($"Всего кошельков {_repository.Wallets.Count()}");
+                Console.WriteLine($"Всего транзакций {_repository.Transactions.Count()}");
             }
             catch (JsonException)
             {
@@ -96,7 +99,7 @@ public class ConsoleApp(Repository repository)
             Console.WriteLine("Подтвердите ввод, нажатием <Enter>");
             ConsoleExt.ReadLineOrThrow();
 
-            var wallet = repository.AddWallet(name, currency, balance);
+            var wallet = _repository.AddWallet(name, currency, balance);
             Console.WriteLine("Добавлен новый кошелёк:");
             TablePrinter.Print([WalletFields, wallet]);
         }
@@ -116,7 +119,7 @@ public class ConsoleApp(Repository repository)
                 ConsoleExt.ReadIntOrThrow,
                 formatFailMessage: "Вы ввели не целое число", (
                     failMessage: "Кошелька под таким Id не существует",
-                    check: id => repository.TryGetWalletById(id, out outWallet)
+                    check: id => _repository.TryGetWalletById(id, out outWallet)
                 ), (
                     failMessage: "Вы отменили выбор кошелька, повторите вновь",
                     check: _ => IsConfirmingWalletChoice(outWallet!)
@@ -153,7 +156,7 @@ public class ConsoleApp(Repository repository)
             Console.WriteLine("Подтвердите ввод, нажатием <Enter>");
             ConsoleExt.ReadLineOrThrow();
 
-            if (!repository.TryAddTransaction(
+            if (!_repository.TryAddTransaction(
                     walletId, DateOnly.FromDateTime(DateTime.Now), update, description,
                     out var transaction))
             {
@@ -184,6 +187,67 @@ public class ConsoleApp(Repository repository)
             {
                 return false;
             }
+        }
+    }
+
+    public void OnPrintDataForMonth()
+    {
+        if (_repository.IsEmpty)
+        {
+            Console.WriteLine("Кошельков нет");
+            return;
+        }
+        if (!_repository.Transactions.Any())
+        {
+            Console.WriteLine("Транзакций нет");
+            return;
+        }
+
+        Console.WriteLine("Введите год для фильтрации:");
+        var year = ConsoleExt.Retrying(
+            ConsoleExt.ReadIntOrThrow,
+            formatFailMessage: "Вы ввели не целое число", (
+                failMessage: "Год не может быть отрицательным",
+                check: year => year > 0
+            ));
+
+        Console.WriteLine("Введите месяц (1-12) для фильтрации:");
+        var month = ConsoleExt.Retrying(
+            ConsoleExt.ReadIntOrThrow,
+            formatFailMessage: "Вы ввели не целое число", (
+                failMessage: "Месяц должен быть от 1 до 12",
+                check: month => month is >= 1 and <= 12
+            ));
+
+        var (incomes, expenses, incomesSum, expensesSum) = _repository.GetMonthlyTransactionsReport(year, month);
+
+        if (incomes.Count == 0)
+        {
+            Console.WriteLine("Зачислений не произодилось");
+            Console.WriteLine();
+            TablePrinter.Print(expenses.Prepend<object>(TransactionFields).ToArray());
+        }
+        else if (expenses.Count == 0)
+        {
+            Console.WriteLine("Списаний не произодилось");
+            Console.WriteLine();
+            TablePrinter.Print(incomes.Prepend<object>(TransactionFields).ToArray());
+        }
+        else if (incomesSum >= expensesSum)
+        {
+            Console.WriteLine($"Сумма зачислений: {incomesSum}");
+            TablePrinter.Print(incomes.Prepend<object>(TransactionFields).ToArray());
+            Console.WriteLine();
+            Console.WriteLine($"Сумма списаний: {expensesSum}");
+            TablePrinter.Print(expenses.Prepend<object>(TransactionFields).ToArray());
+        }
+        else
+        {
+            Console.WriteLine($"Сумма списаний: {expensesSum}");
+            TablePrinter.Print(expenses.Prepend<object>(TransactionFields).ToArray());
+            Console.WriteLine();
+            Console.WriteLine($"Сумма зачислений: {incomesSum}");
+            TablePrinter.Print(incomes.Prepend<object>(TransactionFields).ToArray());
         }
     }
 }

@@ -9,6 +9,12 @@ public class Repository
 
     private readonly Dictionary<int, Wallet> _wallets = [];
 
+    public bool IsEmpty => _wallets.Count == 0;
+
+    public IEnumerable<Wallet> Wallets => _wallets.Values;
+
+    public IEnumerable<Transaction> Transactions => Wallets.SelectMany(wallet => wallet.Transactions);
+
     public void Load(IEnumerable<WalletPOCO> wallets, IEnumerable<TransactionPOCO> transactions)
     {
         var transactionsList = transactions.ToList();
@@ -42,4 +48,30 @@ public class Repository
     }
 
     public bool TryGetWalletById(int id, out Wallet? wallet) => _wallets.TryGetValue(id, out wallet);
+
+    public MonthlyTransactionsReport GetMonthlyTransactionsReport(int year, int month)
+    {
+        var thatMonth = Transactions
+            .Where(t => t.Date.Month == month && t.Date.Year == year)
+            .ToList();
+
+        var incomes = thatMonth
+            .Where(transaction => transaction.Type == TransactionType.Income)
+            .OrderBy(transaction => transaction.Date)
+            .ToList();
+
+        var expenses = thatMonth
+            .Where(transaction => transaction.Type == TransactionType.Expense)
+            .OrderBy(transaction => transaction.Date)
+            .ToList();
+
+        return new (incomes, expenses, incomes.Sum(t => t.AbsoluteAmount), expenses.Sum(t => t.AbsoluteAmount));
+    }
+
+    public record struct MonthlyTransactionsReport(
+        IReadOnlyList<Transaction> Incomes,
+        IReadOnlyList<Transaction> Expenses,
+        decimal IncomesSum,
+        decimal ExpensesSum
+    );
 }

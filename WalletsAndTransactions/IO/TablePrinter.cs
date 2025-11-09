@@ -6,15 +6,26 @@ public partial class TablePrinter(string[][] rows) // TODO Row as class with Div
 
     // TODO guard checks for rows and move it to factory method
 
+    public static TablePrinter OfAny(object[] rows) =>
+        new ((from row in rows select Converters[row.GetType()](row)).ToArray());
+
     public static void Print(string[][] rows) => new TablePrinter(rows).Print();
 
-    public static void Print(object[] rows) => Print((from row in rows select Converters[row.GetType()](row)).ToArray());
+    public static void Print(object[] rows) => OfAny(rows).Print();
 
-    public void Print()
+    public IEnumerable<string> GetLines()
     {
         foreach (var row in rows)
         {
-            Console.WriteLine(string.Join(" | ", row.Select((cell, i) => cell.PadRight(_lengths[i], ' '))));
+            yield return string.Join(" | ", row.Select((cell, i) => cell.PadRight(_lengths[i], ' ')));
+        }
+    }
+
+    public void Print()
+    {
+        foreach (var line in GetLines())
+        {
+            Console.WriteLine(line);
         }
     }
 
