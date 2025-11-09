@@ -126,6 +126,19 @@ public class ConsoleApp(Repository repository)
                 ));
             var wallet = outWallet!;
 
+            Console.WriteLine("Введите дату транзакции: \"День Месяц Год\", (Без кавычек)");
+
+            var today = DateOnly.FromDateTime(DateTime.Now);
+            DateOnly date = default;
+            ConsoleExt.Retrying(
+                ConsoleExt.ReadLineOrThrow, (
+                    failMessage: "Формат даты: \"День Месяц Год\", (Без кавычек)",
+                    check: input => DateOnly.TryParseExact(input, "d M yyyy", out date)
+                ), (
+                    failMessage: "Вы не можете записать транзакцию из будущего",
+                    check: _ => date <= today
+                ));
+
             Console.WriteLine("Введите описание транзакции или пустую строку:");
             string? description = ConsoleExt.ReadLineOrThrow();
             if (description.Length == 0)
@@ -150,14 +163,15 @@ public class ConsoleApp(Repository repository)
             Console.WriteLine("Вы ввели:");
             TablePrinter.Print([
                 ["Id кошелька", walletId.ToString()],
-                ["Описание транзакции", description ?? "/Пусто/"],
+                ["Дата", date.ToString()],
                 ["Сумма", decimal.Abs(update).ToString(CultureInfo.CurrentCulture)],
-                ["Тип", update > 0 ? "Зачисление" : "Списание"]]);
+                ["Тип", update > 0 ? "Зачисление" : "Списание"],
+                ["Описание транзакции", description ?? "/Пусто/"]]);
             Console.WriteLine("Подтвердите ввод, нажатием <Enter>");
             ConsoleExt.ReadLineOrThrow();
 
             if (!_repository.TryAddTransaction(
-                    walletId, DateOnly.FromDateTime(DateTime.Now), update, description,
+                    walletId, date, update, description,
                     out var transaction))
             {
                 Console.WriteLine("Неизвестная ошибка при добавлении транзакции");
