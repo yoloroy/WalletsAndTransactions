@@ -1,4 +1,4 @@
-namespace WalletsAndTransactions.Entities;
+namespace WalletsAndTransactions.Model;
 
 public class Wallet(
     int id,

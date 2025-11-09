@@ -1,6 +1,6 @@
-using static WalletsAndTransactions.Entities.TransactionType;
+using static WalletsAndTransactions.Model.TransactionType;
 
-namespace WalletsAndTransactions.Entities;
+namespace WalletsAndTransactions.Model;
 
 public record Transaction(
     int Id,

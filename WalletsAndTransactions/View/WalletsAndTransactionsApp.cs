@@ -1,12 +1,12 @@
 using System.Globalization;
 using System.Text.Json;
-using WalletsAndTransactions.Entities;
 using WalletsAndTransactions.IO;
+using WalletsAndTransactions.Model;
 using WalletsAndTransactions.POCOs;
 using WalletsAndTransactions.Util;
 using FileDialog = NativeFileDialogCore.Dialog;
 
-namespace WalletsAndTransactions;
+namespace WalletsAndTransactions.View;
 
 public class WalletsAndTransactionsApp
 {

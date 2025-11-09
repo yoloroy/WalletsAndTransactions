@@ -1,5 +1,6 @@
 ﻿using WalletsAndTransactions;
 using WalletsAndTransactions.IO;
+using WalletsAndTransactions.View;
 
 var app = new WalletsAndTransactionsApp();
 var exit = false;

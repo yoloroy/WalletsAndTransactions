@@ -1,4 +1,4 @@
-using WalletsAndTransactions.Entities;
+using WalletsAndTransactions.Model;
 
 namespace WalletsAndTransactions.POCOs;
 

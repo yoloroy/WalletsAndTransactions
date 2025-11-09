@@ -1,5 +1,5 @@
 using System.Globalization;
-using WalletsAndTransactions.Entities;
+using WalletsAndTransactions.Model;
 
 namespace WalletsAndTransactions.IO;
 
