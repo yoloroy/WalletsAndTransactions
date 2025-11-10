@@ -73,8 +73,8 @@ public sealed class MainLoop(ConsoleApp app)
         }
 
         ConsoleExt.Init(string.IsNullOrEmpty(line)
-            ? new ConsoleExt.ColorsTheme(ConsoleColor.Black, ConsoleColor.DarkYellow)
-            : new ConsoleExt.ColorsTheme(ConsoleColor.White, ConsoleColor.Yellow));
+            ? new ConsoleExt.ColorsTheme(ConsoleColor.White, ConsoleColor.Yellow)
+            : new ConsoleExt.ColorsTheme(ConsoleColor.Black, ConsoleColor.DarkYellow));
 
         return true;
     }
