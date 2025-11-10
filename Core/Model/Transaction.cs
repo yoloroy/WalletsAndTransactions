@@ -1,8 +1,8 @@
-using static WalletsAndTransactions.Model.TransactionType;
+using static Core.Model.TransactionType;
 
-namespace WalletsAndTransactions.Model;
+namespace Core.Model;
 
-public record Transaction(
+public sealed record Transaction(
     int Id,
     DateOnly Date,
     decimal SumUpdate,

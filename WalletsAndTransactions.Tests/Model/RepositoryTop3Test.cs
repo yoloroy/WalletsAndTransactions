@@ -1,5 +1,6 @@
+using Core;
+using Core.Model;
 using NUnit.Framework;
-using WalletsAndTransactions.Model;
 using System;
 using System.Linq;
 

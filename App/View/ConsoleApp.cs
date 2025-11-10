@@ -1,14 +1,15 @@
+using App.IO;
+using Core;
+using Core.Model;
+using Core.POCOs;
+using NativeFileDialogNET;
 using System.Globalization;
 using System.Text.Json;
-using NativeFileDialogNET;
-using WalletsAndTransactions.IO;
-using WalletsAndTransactions.Model;
-using WalletsAndTransactions.POCOs;
-using WalletsAndTransactions.Util;
+using Util;
 
-namespace WalletsAndTransactions.View;
+namespace App.View;
 
-public class ConsoleApp(Repository repository)
+public sealed class ConsoleApp(Repository repository)
 {
     private static readonly string[] WalletFields = ["Id", "Название", "Валюта", "Начальный баланс", "Текущий Баланс"];
     private static readonly string[] TransactionFields = ["Id", "Дата", "Сумма", "Тип", "Описание"];
@@ -20,7 +21,8 @@ public class ConsoleApp(Repository repository)
         try
         {
             Console.WriteLine("Вам будет открыто окно для выбора файла");
-            new NativeFileDialog()
+            using var dialog = new NativeFileDialog();
+            dialog
                 .AddFilter("json", "json")
                 .SelectFile()
                 .Open(out string? result);
@@ -285,8 +287,10 @@ public class ConsoleApp(Repository repository)
             .GetLines();
 
         // Пропустим заголовок
+        // ReSharper disable PossibleMultipleEnumeration
         Console.WriteLine(walletsRows.First());
         var blocks = walletsRows.Skip(1).Zip(tops.Select(top => top.Top3));
+        // ReSharper restore PossibleMultipleEnumeration
 
         foreach (var (walletLine, transactions) in blocks)
         {

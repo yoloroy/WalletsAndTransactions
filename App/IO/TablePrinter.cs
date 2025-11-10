@@ -1,6 +1,6 @@
-namespace WalletsAndTransactions.IO;
+namespace App.IO;
 
-public partial class TablePrinter
+public sealed partial class TablePrinter
 {
     private readonly int[] _lengths;
     private readonly string[][] _rows;
@@ -28,7 +28,7 @@ public partial class TablePrinter
     }
 
     public static TablePrinter OfAny(object[] rows) =>
-        new ((from row in rows select Converters[row.GetType()](row)).ToArray());
+        new((from row in rows select Converters[row.GetType()](row)).ToArray());
 
     public static void Print(string[][] rows) => new TablePrinter(rows).Print();
 

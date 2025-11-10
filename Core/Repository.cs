@@ -1,11 +1,12 @@
-using WalletsAndTransactions.POCOs;
+using Core.Model;
+using Core.POCOs;
 
-namespace WalletsAndTransactions.Model;
+namespace Core;
 
-public class Repository
+public sealed class Repository
 {
-    private int _nextWalletId = 0;
-    private int _nextTransactionId = 0;
+    private int _nextWalletId;
+    private int _nextTransactionId;
 
     private readonly Dictionary<int, Wallet> _wallets = [];
 
@@ -102,7 +103,7 @@ public class Repository
             .OrderBy(transaction => transaction.Date)
             .ToList();
 
-        return new (incomes, expenses, incomes.Sum(t => t.AbsoluteAmount), expenses.Sum(t => t.AbsoluteAmount));
+        return new(incomes, expenses, incomes.Sum(t => t.AbsoluteAmount), expenses.Sum(t => t.AbsoluteAmount));
     }
 
     /// <param name="year">Год</param>
@@ -121,20 +122,4 @@ public class Repository
                 .AsEnumerable()))
             .Where(group => group.Item2.Any());
     }
-
-    /// <summary>
-    /// Сгруппированные транзакции по типам (Income/Expense),
-    /// группы отсортированные по общей сумме (по убыванию),
-    /// в каждой группе транзакции отсортированны по дате (от самых старых к самым новым).
-    /// </summary>
-    /// <param name="Incomes">Зачисления</param>
-    /// <param name="Expenses">Списания</param>
-    /// <param name="IncomesSum">Абсолютная сумма зачислений</param>
-    /// <param name="ExpensesSum">Абсолютная сумма списания</param>
-    public record struct MonthlyTransactionsReport(
-        IReadOnlyList<Transaction> Incomes,
-        IReadOnlyList<Transaction> Expenses,
-        decimal IncomesSum,
-        decimal ExpensesSum
-    );
 }

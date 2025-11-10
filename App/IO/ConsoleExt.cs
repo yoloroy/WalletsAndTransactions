@@ -1,8 +1,8 @@
 using System.Globalization;
 
-namespace WalletsAndTransactions.IO;
+namespace App.IO;
 
-public static class ConsoleExt
+internal static class ConsoleExt
 {
     private static ColorsTheme _theme;
 

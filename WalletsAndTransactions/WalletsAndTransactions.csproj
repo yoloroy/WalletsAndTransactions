@@ -6,11 +6,27 @@
         <LangVersion>latestmajor</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <EnableNETAnalyzers>true</EnableNETAnalyzers>
+        <AnalysisMode>All</AnalysisMode>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <AnalysisLevel>latest-All</AnalysisLevel>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="NativeFileDialogNET" Version="2.0.2" />
       <PackageReference Include="System.Text.Json" Version="9.0.10" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="IO\" />
+      <Folder Include="Model\" />
+      <Folder Include="POCOs\" />
+      <Folder Include="Util\" />
+      <Folder Include="View\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\App\App.csproj" />
+      <ProjectReference Include="..\Core\Core.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
-namespace WalletsAndTransactions.Model;
+namespace Core.Model;
 
-public class Wallet(
+public sealed class Wallet(
     int id,
     string name,
     string currencyId,

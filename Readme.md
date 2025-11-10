@@ -35,17 +35,17 @@
 ## Навигация
 
 - [Program.cs](WalletsAndTransactions/Program.cs)
-  - Точка входа в приложение, отвечает за инициализацию компонентов, управление цветовой темой и главный цикл меню
-- [View/ConsoleApp.cs](WalletsAndTransactions/View/ConsoleApp.cs)
+  - Точка входа в приложение, отвечает за инициализацию компонентов
+- [View/ConsoleApp.cs](App/View/ConsoleApp.cs)
   - View, отвечает за весь диалог с пользователем: рендеринг меню, запрос данных, валидацию пользовательского ввода и форматирование отчетов для вывода
-- [Model/](WalletsAndTransactions/Model)
+- [View/MainLoop.cs](App/View/MainLoop.cs)
+  - View, отвечает за основной цикл приложения
+- [Core/](Core/)
   - Репозиторий и сущности
-- [POCOs/](WalletsAndTransactions/POCOs)
-  - "Plain Old C# Objects". Упрощенные классы, используемые только для десериализации данных из `.json`.
-- [IO/](WalletsAndTransactions/IO) -- Вспомогательные классы для ввода-вывода
+- [IO/](App/IO) -- Вспомогательные классы для ввода-вывода
   - `ConsoleExt.cs`: Утилиты для надежного ввода (`Retrying`) и управления цветами консоли
   - `TablePrinter.cs`: Универсальный класс для красивой печати данных в виде таблицы
-- [Util/](WalletsAndTransactions/Util)
+- [Util/](Util/)
   - Мелкие утилиты, такие как `JsonSerializerExt` для удобной десериализации
 - [WalletsAndTransactions.Tests/](WalletsAndTransactions.Tests)
   - Unit-тесты, см. принцип TDBF ниже
@@ -60,6 +60,7 @@
 
 ## TODO
 
+- Вывести интерфейс IRepository и имплементацию InMemoryRepository из текущего класса Core.Repository, если потребуется альтернативная реализация
 - Добавить гифки в Readme для демонстрации
 - Дописать docstrings для всех публичных методов
 - Вынести строки в ресурсы

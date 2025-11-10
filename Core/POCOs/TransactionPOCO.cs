@@ -1,8 +1,6 @@
-using WalletsAndTransactions.Model;
+namespace Core.POCOs;
 
-namespace WalletsAndTransactions.POCOs;
-
-public class TransactionPOCO
+public sealed class TransactionPOCO
 {
     public int Id { get; set; }
     public int WalletId { get; set; }

@@ -1,8 +1,6 @@
-using WalletsAndTransactions.Model;
+namespace Core.POCOs;
 
-namespace WalletsAndTransactions.POCOs;
-
-public class WalletPOCO
+public sealed class WalletPOCO
 {
     public int Id { get; set; }
     public required string Name { get; set; }

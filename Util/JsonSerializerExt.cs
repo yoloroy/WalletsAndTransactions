@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace WalletsAndTransactions.Util;
+namespace Util;
 
 public static class JsonSerializerExt
 {
@@ -14,7 +14,7 @@ public static class JsonSerializerExt
     /// <param name="content">Строка с данными</param>
     /// <param name="_">Объект, из которого выводится тип</param>
     /// <typeparam name="T">Выведенный тип</typeparam>
-    /// <seealso cref="System.Text.Json.JsonSerializer.Deserialize"/>
+    /// <see cref="System.Text.Json.JsonSerializer"/>
     /// <returns>Десериализованный объект</returns>
     public static T? DeserializeBy<T>(string content, T _) => JsonSerializer.Deserialize<T>(content);
 }

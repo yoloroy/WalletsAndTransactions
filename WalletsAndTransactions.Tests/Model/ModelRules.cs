@@ -1,8 +1,9 @@
+using Core;
+using Core.Model;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
-using WalletsAndTransactions.Model;
 
 namespace WalletsAndTransactions.Tests.Model;
 
@@ -49,7 +50,7 @@ public class ModelRules
         var dateDay5 = new DateOnly(2025, 1, 5);
 
         var wallet = new Wallet(0, "test", "TST", 100.0m, new List<Transaction>());
-        
+
         var futureTransaction = new Transaction(0, dateDay5, -80m);
         Assert.That(wallet.TryAddTransaction(futureTransaction), Is.True);
 
