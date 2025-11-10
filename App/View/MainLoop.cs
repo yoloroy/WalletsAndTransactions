@@ -61,7 +61,7 @@ public sealed class MainLoop(ConsoleApp app)
         Console.WriteLine("\nПрощайте");
     }
 
-    private bool TryAskTheme()
+    private static bool TryAskTheme()
     {
         Console.WriteLine("Если тема вашей консоли белая, введите что-либо и нажмите <Enter>,\n" +
                           "иначе нажмите <Enter> без ввода");
@@ -72,14 +72,14 @@ public sealed class MainLoop(ConsoleApp app)
             return false;
         }
 
-        ConsoleExt.Init(line == ""
-            ? new ConsoleExt.ColorsTheme(ConsoleColor.White, ConsoleColor.Yellow)
-            : new ConsoleExt.ColorsTheme(ConsoleColor.Black, ConsoleColor.DarkYellow));
+        ConsoleExt.Init(string.IsNullOrEmpty(line)
+            ? new ConsoleExt.ColorsTheme(ConsoleColor.Black, ConsoleColor.DarkYellow)
+            : new ConsoleExt.ColorsTheme(ConsoleColor.White, ConsoleColor.Yellow));
 
         return true;
     }
 
-    private void InitStatic()
+    private static void InitStatic()
     {
         TablePrinter.AddConverter<Wallet>(wallet =>
         [

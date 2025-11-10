@@ -5,14 +5,14 @@ public sealed class Wallet(
     string name,
     string currencyId,
     decimal startingBalance,
-    List<Transaction> transactions)
+    IReadOnlyList<Transaction> transactions)
 {
-    private readonly List<Transaction> _transactions = transactions;
+    private readonly List<Transaction> _transactions = transactions.ToList();
 
-    public readonly int Id = id;
-    public readonly string Name = name;
-    public readonly string CurrencyId = currencyId;
-    public readonly decimal StartingBalance = startingBalance;
+    public int Id { get; } = id;
+    public string Name { get; } = name;
+    public string CurrencyId { get; } = currencyId;
+    public decimal StartingBalance { get; } = startingBalance;
 
     public IEnumerable<Transaction> Transactions => _transactions;
 
@@ -54,9 +54,9 @@ public sealed class Wallet(
             .All(transaction => (balance += transaction.SumUpdate) >= 0);
     }
 
-    public static bool NameIsNotEmpty(string name) => name.Length > 0;
+    public static bool NameIsNotEmpty(string name) => name is { Length: > 0 };
 
-    public static bool CurrencyIdIsNotEmpty(string currencyId) => currencyId.Length > 0;
+    public static bool CurrencyIdIsNotEmpty(string currencyId) => !string.IsNullOrEmpty(currencyId);
 
     public static bool StartingBalanceIsNotNegative(decimal balance) => balance >= 0;
 }

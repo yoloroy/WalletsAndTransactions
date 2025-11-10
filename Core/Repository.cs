@@ -24,6 +24,8 @@ public sealed class Repository
     /// <returns>Были ли загружены данные</returns>
     public bool TryLoad(IEnumerable<WalletPOCO> wallets, IEnumerable<TransactionPOCO> transactions)
     {
+        ArgumentNullException.ThrowIfNull(wallets);
+
         var transactionsList = transactions.ToLookup(keySelector: poco => poco.WalletId);
 
         foreach (var wallet in wallets)
